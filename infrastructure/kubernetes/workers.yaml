@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: celery-workers
+  namespace: video-ai-platform
+  labels:
+    app: celery-workers
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: celery-workers
+  template:
+    metadata:
+      labels:
+        app: celery-workers
+    spec:
+      containers:
+        - name: worker
+          image: video-ai-platform/worker:latest
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: backend-config
+          env:
+            - name: DATABASE_URL
+              value: "postgresql+asyncpg://postgres:postgres@postgres-service:5432/video_ai_db"
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: 2000m
+              memory: 4Gi
